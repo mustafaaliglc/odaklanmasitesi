@@ -1,0 +1,6 @@
+{
+  "name": "Odaklanma ve Pomodoro Uygulaması",
+  "description": "Geri sayım, çalışma seansları, mola bildirimleri ve günlük istatistikler içeren modern Pomodoro uygulaması.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

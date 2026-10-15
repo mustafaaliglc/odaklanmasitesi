@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Odaklanma ve Pomodoro Uygulaması</title>
+  <meta name="description" content="Geri sayım, çalışma seansları, mola bildirimleri ve günlük istatistikler içeren modern Pomodoro uygulaması." />
+  <meta property="og:title" content="Odaklanma ve Pomodoro Uygulaması" />
+  <meta property="og:description" content="Geri sayım, çalışma seansları, mola bildirimleri ve günlük istatistikler içeren modern Pomodoro uygulaması." />
+  <meta property="og:type" content="website" />
+  
+  <!-- Doğrudan derleme gerektirmeden çalışan CSS -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <!-- Arka Plan Işık Efekti -->
+  <div class="ambient-glow"></div>
+
+  <!-- Zen Modundan Çıkış Butonu -->
+  <button id="zen-exit-btn" class="btn-icon zen-exit-btn" title="Zen Modundan Çık (Esc)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+    </svg>
+  </button>
+
+  <!-- Bildirim Konteyneri -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Ana Uygulama Kapsayıcısı -->
+  <main class="app-container">
+    
+    <!-- Üst Başlık Çubuğu -->
+    <header class="header-bar">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1>Odak & Pomodoro</h1>
+          <span>Verimli Çalışma ve Mola Yönetimi</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Bildirim İzni Butonu -->
+        <button id="btn-request-notification" class="btn-icon" title="Mola Bildirimlerini Etkinleştir">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+        </button>
+
+        <!-- Zen Odak Modu Butonu -->
+        <button id="btn-toggle-zen" class="btn-icon" title="Zen Odak Modu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h6v6m0-6-7 7M9 21H3v-6m0 6 7-7"></path>
+          </svg>
+        </button>
+
+        <!-- İstatistikler Butonu -->
+        <button id="btn-open-stats" class="btn-icon" title="Günlük ve Haftalık İstatistikler">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </button>
+
+        <!-- Ayarlar Butonu -->
+        <button id="btn-open-settings" class="btn-icon" title="Zamanlayıcı ve Ses Ayarları">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mod Değiştirme Butonları (Odaklanma, Kısa Mola, Uzun Mola) -->
+    <nav class="mode-tabs">
+      <div class="mode-tabs-container">
+        <button class="tab-btn active" data-mode="pomodoro">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Odaklanma
+        </button>
+        <button class="tab-btn" data-mode="shortBreak">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+          </svg>
+          Kısa Mola
+        </button>
+        <button class="tab-btn" data-mode="longBreak">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+            <path d="M2 12h20"></path>
+          </svg>
+          Uzun Mola
+        </button>
+      </div>
+    </nav>
+
+    <!-- Ana Çalışma Alanı Grid -->
+    <div class="main-grid">
+      
+      <!-- Sol / Ana Bölüm: Sayaç ve Kontroller -->
+      <section class="card timer-hero">
+        
+        <!-- Dairesel İlerleme ve Sayısal Zaman Göstergesi -->
+        <div class="progress-ring-wrapper">
+          <svg class="progress-ring" viewBox="0 0 300 300">
+            <!-- Arka Plan Halkası -->
+            <circle
+              class="progress-ring-bg"
+              cx="150"
+              cy="150"
+              r="130"
+              stroke-width="10"
+              fill="transparent"
+            />
+            <!-- İlerleme Halkası -->
+            <circle
+              id="progress-ring-circle"
+              class="progress-ring-circle"
+              cx="150"
+              cy="150"
+              r="130"
+              stroke-width="10"
+              fill="transparent"
+              stroke-dasharray="816.8"
+              stroke-dashoffset="0"
+            />
+          </svg>
+
+          <!-- Dairenin Merkezindeki Yazılar -->
+          <div class="timer-inner-content">
+            <div id="timer-display" class="timer-display">25:00</div>
+            <div id="timer-mode-badge" class="timer-mode-badge">Odaklanma</div>
+            <div id="active-task-pill" class="active-task-pill">Aktif Görev: Yok</div>
+          </div>
+        </div>
+
+        <!-- Seans Döngüsü Göstergeleri (Dot İndikatörler) -->
+        <div class="cycle-indicators">
+          <div id="cycle-dots-container" style="display:flex; gap:0.4rem; align-items:center;"></div>
+          <span id="cycle-label" class="cycle-label">Döngü: 1/4</span>
+        </div>
+
+        <!-- Zamanlayıcı Kontrol Butonları -->
+        <div class="timer-controls">
+          <!-- Sıfırla Butonu -->
+          <button id="btn-reset" class="btn-secondary-action" title="Sıfırla (R)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+          </button>
+
+          <!-- Başlat / Duraklat Ana Buton -->
+          <button id="btn-play-pause" class="btn-main-action">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Başlat</span>
+          </button>
+
+          <!-- Seansı Geç / Atla Butonu -->
+          <button id="btn-skip" class="btn-secondary-action" title="Sonraki Seansa Geç (S)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Klavye Kısayolları Bilgisi -->
+        <div class="keyboard-hint">
+          <kbd>Boşluk</kbd> Başlat/Duraklat &nbsp;•&nbsp; <kbd>R</kbd> Sıfırla &nbsp;•&nbsp; <kbd>S</kbd> Sonraki &nbsp;•&nbsp; <kbd>Esc</kbd> Zen Kapat
+        </div>
+      </section>
+
+      <!-- Sağ Bölüm: Görevler, Hızlı İstatistik ve Ortam Sesi -->
+      <aside class="side-panel">
+        
+        <!-- Günlük Hızlı Durum Kartı -->
+        <div class="card">
+          <div class="section-header">
+            <h2 class="section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Bugünkü Durum
+            </h2>
+            <button onclick="document.getElementById('btn-open-stats').click()" class="btn-icon" style="width:30px; height:30px;" title="Detaylı Rapor">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div class="daily-quick-stats">
+            <div class="stat-box">
+              <div id="quick-stat-pomodoros" class="stat-value">0/8</div>
+              <div class="stat-name">Seans</div>
+            </div>
+            <div class="stat-box">
+              <div id="quick-stat-time" class="stat-value">0dk</div>
+              <div class="stat-name">Odaklanma</div>
+            </div>
+            <div class="stat-box">
+              <div id="quick-stat-streak" class="stat-value">0 Gün</div>
+              <div class="stat-name">Seri 🔥</div>
+            </div>
+          </div>
+
+          <div class="daily-target-progress">
+            <div class="target-header">
+              <span id="target-header-text">Günlük Hedef: %0</span>
+              <span>Hedef: 8 Seans</span>
+            </div>
+            <div class="target-progress-bar">
+              <div id="target-progress-fill" class="target-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Görev Yönetimi Kartı -->
+        <div class="card">
+          <div class="section-header">
+            <h2 class="section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              Görevler
+            </h2>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Tıkla ve seans bağla</span>
+          </div>
+
+          <div class="task-input-wrapper">
+            <input type="text" id="input-new-task" class="input-text" placeholder="Ne üzerinde çalışıyorsun?" />
+            <input type="number" id="input-task-est" class="setting-input-number" style="width:50px;" title="Tahmini Seans" value="2" min="1" max="20" />
+            <button id="btn-add-task" class="btn-add-task" title="Görev Ekle">+</button>
+          </div>
+
+          <div id="task-list" class="task-list"></div>
+        </div>
+
+        <!-- Arka Plan Ortam Sesleri (Web Audio Synth) -->
+        <div class="card">
+          <div class="section-header">
+            <h2 class="section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18V5l12-2v13"></path>
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="18" cy="16" r="3"></circle>
+              </svg>
+              Odaklanma Sesleri
+            </h2>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Sentezlenmiş Ses</span>
+          </div>
+
+          <div class="ambient-grid">
+            <button class="ambient-btn" data-sound="rain">
+              <span style="font-size:1.3rem;">🌧️</span>
+              <span>Yağmur</span>
+            </button>
+            <button class="ambient-btn" data-sound="waves">
+              <span style="font-size:1.3rem;">🌊</span>
+              <span>Dalgalar</span>
+            </button>
+            <button class="ambient-btn" data-sound="wind">
+              <span style="font-size:1.3rem;">🌲</span>
+              <span>Rüzgar</span>
+            </button>
+            <button class="ambient-btn" data-sound="brown">
+              <span style="font-size:1.3rem;">☕</span>
+              <span>Brown Noise</span>
+            </button>
+          </div>
+
+          <div class="ambient-volume-row">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <input type="range" id="ambient-volume-slider" class="ambient-slider" min="0" max="1" step="0.05" value="0.4" title="Ortam Sesi Seviyesi" />
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- Altbilgi -->
+    <footer class="footer">
+      <p>Odaklanma ve Pomodoro Uygulaması • Tarayıcıda derleme gerektirmeden çalışır • Yerel depolama ile veri gizliliği korunur</p>
+    </footer>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: Günlük & Haftalık İstatistikler                    -->
+  <!-- ======================================================== -->
+  <div id="stats-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          Çalışma İstatistikleri
+        </h3>
+        <button id="btn-close-stats" class="btn-close-modal" title="Kapat">✕</button>
+      </div>
+
+      <!-- İstatistik Metrikleri -->
+      <div class="stats-summary-grid">
+        <div class="stat-metric-card">
+          <div class="metric-label">Toplam Odaklanma</div>
+          <div id="stats-total-time" class="metric-value">0 Saat</div>
+        </div>
+        <div class="stat-metric-card">
+          <div class="metric-label">Toplam Pomodoro</div>
+          <div id="stats-total-pomo" class="metric-value">0 Seans</div>
+        </div>
+        <div class="stat-metric-card">
+          <div class="metric-label">En Verimli Gün</div>
+          <div id="stats-best-day" class="metric-value">-</div>
+        </div>
+        <div class="stat-metric-card">
+          <div class="metric-label">Aktif Seri</div>
+          <div id="stats-streak" class="metric-value">0 Gün</div>
+        </div>
+      </div>
+
+      <!-- Haftalık 7 Günlük Çubuk Grafik -->
+      <div class="chart-container">
+        <div class="chart-title">Son 7 Günün Odaklanma Süreleri (Dakika)</div>
+        <div id="weekly-bar-chart" class="bar-chart"></div>
+      </div>
+
+      <!-- Bugünün Seans Geçmişi -->
+      <div style="margin-top: 1.5rem;">
+        <h4 style="font-size:0.9rem; font-weight:700; margin-bottom:0.75rem;">Bugünkü Tamamlanan Seanslar</h4>
+        <div id="session-history-list" class="task-list" style="max-height:160px;"></div>
+      </div>
+
+      <!-- İstatistik İşlem Butonları -->
+      <div style="display:flex; justify-content:space-between; margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border-color);">
+        <button id="btn-reset-stats" style="background:transparent; border:1px solid rgba(244,63,94,0.4); color:#f43f5e; padding:0.5rem 0.9rem; border-radius:var(--radius-sm); font-size:0.8rem; cursor:pointer;">
+          İstatistikleri Sıfırla
+        </button>
+        <button id="btn-export-stats" style="background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-main); padding:0.5rem 0.9rem; border-radius:var(--radius-sm); font-size:0.8rem; cursor:pointer;">
+          Verileri İndir (JSON)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: Ayarlar                                           -->
+  <!-- ======================================================== -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Uygulama Ayarları
+        </h3>
+        <button id="btn-close-settings" class="btn-close-modal" title="Kapat">✕</button>
+      </div>
+
+      <!-- Seans Süreleri Grubu -->
+      <div class="settings-group">
+        <div class="settings-group-title">Seans Süreleri (Dakika)</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Pomodoro (Odaklanma)</div>
+            <div class="setting-sublabel">Varsayılan 25 dakika</div>
+          </div>
+          <input type="number" id="setting-pomo-time" class="setting-input-number" min="1" max="120" value="25" />
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Kısa Mola</div>
+            <div class="setting-sublabel">Varsayılan 5 dakika</div>
+          </div>
+          <input type="number" id="setting-short-time" class="setting-input-number" min="1" max="60" value="5" />
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Uzun Mola</div>
+            <div class="setting-sublabel">Varsayılan 15 dakika</div>
+          </div>
+          <input type="number" id="setting-long-time" class="setting-input-number" min="1" max="90" value="15" />
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Uzun Mola Aralığı</div>
+            <div class="setting-sublabel">Kaç seans sonra uzun molaya geçilsin?</div>
+          </div>
+          <input type="number" id="setting-cycle-interval" class="setting-input-number" min="1" max="12" value="4" />
+        </div>
+      </div>
+
+      <!-- Otomasyon Grubu -->
+      <div class="settings-group">
+        <div class="settings-group-title">Otomasyon & Hedefler</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Molayı Otomatik Başlat</div>
+            <div class="setting-sublabel">Pomodoro bittiğinde molayı beklemeden başlat</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="setting-auto-breaks" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Çalışmayı Otomatik Başlat</div>
+            <div class="setting-sublabel">Mola bittiğinde sonraki seansı başlat</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="setting-auto-pomos" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Günlük Seans Hedefi</div>
+            <div class="setting-sublabel">Günde kaç Pomodoro hedefliyorsun?</div>
+          </div>
+          <input type="number" id="setting-daily-goal" class="setting-input-number" min="1" max="50" value="8" />
+        </div>
+      </div>
+
+      <!-- Ses ve Tema Grubu -->
+      <div class="settings-group">
+        <div class="settings-group-title">Ses ve Tema</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Mola Bildirim Sesi</div>
+            <div class="setting-sublabel">Süre bitiminde çalacak ton</div>
+          </div>
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <select id="setting-sound-type" class="setting-select">
+              <option value="zen">Zen Çanı (Ahenkli)</option>
+              <option value="digital">Dijital Zil</option>
+              <option value="tibetan">Tibet Kasesi</option>
+            </select>
+            <button id="btn-test-sound" class="btn-icon" style="width:34px; height:34px;" title="Sesi Test Et">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Arayüz Teması</div>
+            <div class="setting-sublabel">Gözü yormayan renk paletleri</div>
+          </div>
+          <select id="setting-theme" class="setting-select">
+            <option value="default">Gece Siyahı (Slate)</option>
+            <option value="sunset">Günbatımı Turuncusu</option>
+            <option value="forest">Zümrüt Ormanı</option>
+            <option value="indigo">Derin İndigo Moru</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Kaydet Butonu -->
+      <div style="margin-top:1.5rem; text-align:right;">
+        <button id="btn-save-settings" class="btn-main-action" style="padding:0.7rem 1.8rem; font-size:0.95rem;">
+          Ayarları Kaydet
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Derleme gerektirmeden doğrudan çalışan JS -->
+  <script src="./app.js"></script>
+</body>
+</html>
